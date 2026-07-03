@@ -1,24 +1,32 @@
+import type { Metadata } from "next";
+import { AuthForm } from "@/components/forms/AuthForm";
+import { Logo } from "@/components/common/Logo";
+
+export const metadata: Metadata = {
+  title: "Create Account",
+};
+
 export default function RegisterPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="card w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6">Create Account</h1>
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
-            <input type="text" className="input" placeholder="Your name" />
+    <div className="min-h-dvh bg-bg-base flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        <div className="flex justify-center mb-8">
+          <Logo size="lg" href="/" />
+        </div>
+
+        <div className="bg-bg-surface rounded-3xl border border-[#E5E7EB] shadow-card p-8">
+          <div className="mb-6 text-center">
+            <h1 className="text-xl font-bold font-display text-ink mb-1">
+              Create your account
+            </h1>
+            <p className="text-sm text-ink-muted">
+              Start testing your AI agents for free
+            </p>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input type="email" className="input" placeholder="you@example.com" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input type="password" className="input" placeholder="••••••••" />
-          </div>
-          <button type="submit" className="btn-primary w-full">Register</button>
-        </form>
+
+          <AuthForm mode="register" />
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -1,28 +1,151 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-  }
+/* ── Tailwind v4 Theme ────────────────────────────────────────────────── */
+@theme {
+  /* Colors */
+  --color-bg-base: #FAFAFC;
+  --color-bg-surface: #FFFFFF;
+  --color-ink: #1A1B25;
+  --color-ink-muted: #6B7280;
+  --color-ink-subtle: #9CA3AF;
+  --color-primary: #6C5CE7;
+  --color-primary-light: #8B7FF0;
+  --color-primary-dark: #5448C8;
+  --color-accent: #00C2A8;
+  --color-accent-light: #00D9BB;
+  --color-accent-dark: #009E88;
+  --color-risk-critical: #FF5A5F;
+  --color-risk-medium: #FFB020;
+  --color-risk-low: #8ED1B0;
+  --color-risk-safe: #00C2A8;
+  --color-risk-critical-bg: #FFF0F0;
+  --color-risk-medium-bg: #FFF8E6;
+  --color-risk-low-bg: #F0FAF5;
+  --color-risk-safe-bg: #E6FAF8;
 
-  body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Box shadows */
+  --shadow-card: 0 1px 3px rgba(26,27,37,0.06), 0 4px 16px rgba(108,92,231,0.06);
+  --shadow-card-hover: 0 4px 12px rgba(26,27,37,0.08), 0 8px 32px rgba(108,92,231,0.12);
+  --shadow-ring-glow: 0 0 20px rgba(108,92,231,0.25);
+  --shadow-accent-glow: 0 0 20px rgba(0,194,168,0.25);
+
+  /* Background images */
+  --background-image-gradient-signature: linear-gradient(135deg, #6C5CE7 0%, #00C2A8 100%);
+  --background-image-gradient-signature-soft: linear-gradient(135deg, rgba(108,92,231,0.08) 0%, rgba(0,194,168,0.08) 100%);
+  --background-image-gradient-card: linear-gradient(135deg, #FFFFFF 0%, #F5F5FC 100%);
+
+  /* Border radius extras */
+  --radius-4xl: 2rem;
+
+  /* Animations */
+  --animate-health-pulse: health-pulse 2s ease-in-out infinite;
+  --animate-dot-pulse: dot-pulse 1.5s ease-in-out infinite;
+  --animate-fade-slide-up: fade-slide-up 0.4s ease-out forwards;
+  --animate-spin-slow: spin 3s linear infinite;
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+
+  /* Font sizes */
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 0.875rem;
+}
+
+/* ── Custom keyframes ─────────────────────────────────────────────────── */
+@keyframes health-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.03); }
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes fade-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Global Base ──────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  min-height: 100dvh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+code, pre, .font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ── Focus Styles ─────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* ── Gradient utilities ───────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #6C5CE7 0%, #00C2A8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Persona dot pulse ────────────────────────────────────────────────── */
+.persona-dot-running {
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── prefers-reduced-motion ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors;
-  }
+/* ── Page container ───────────────────────────────────────────────────── */
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
 
-  .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
-  }
-
-  .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
-  }
+@media (max-width: 640px) {
+  .page-container { padding: 1.25rem 1rem; }
 }
