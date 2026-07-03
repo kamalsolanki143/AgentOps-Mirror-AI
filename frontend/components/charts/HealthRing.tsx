@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/utils/cn";
-import { scoreToColor } from "@/utils/riskLevel";
+
 import { formatHealthScore } from "@/lib/formatters";
 
 // ── Size presets ──────────────────────────────────────────────────────────
@@ -61,8 +61,7 @@ export function HealthRing({
     motionScore.set(score);
   }, [score, motionScore]);
 
-  // Compute color based on score
-  const ringColor = scoreToColor(score);
+
 
   // Use a unique gradient ID to prevent SVG conflicts when multiple rings rendered
   const uniqueGradientId = `${gradientId}-${diameter}`;

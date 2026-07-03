@@ -19,8 +19,7 @@ export function AppShell({ children }: AppShellProps) {
   const isPublicRoute = PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/")
   );
-  // Special: landing page "/" is public but login/register also public
-  const isLanding = pathname === "/";
+
 
   if (isPublicRoute) {
     return <>{children}</>;

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ROUTES } from "@/constants/routes";
 import { formatDuration } from "@/lib/formatters";
-import { scoreToRiskLevel } from "@/utils/riskLevel";
+
 import { cn } from "@/utils/cn";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -125,7 +125,7 @@ export default function LiveRunPage({ params }: LiveRunPageProps) {
                 { level: "critical" as const, count: run.metrics.criticalRisks, label: "Critical" },
                 { level: "medium" as const, count: run.metrics.mediumRisks, label: "Medium" },
                 { level: "low" as const, count: run.metrics.lowRisks, label: "Low" },
-              ].map(({ level, count, label }) => (
+              ].map(({ level, count }) => (
                 <div key={level} className="flex items-center justify-between">
                   <RiskBadge level={level} size="sm" />
                   <span className="text-sm font-bold font-mono text-ink">{count}</span>

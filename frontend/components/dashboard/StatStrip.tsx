@@ -3,7 +3,7 @@ import { cn } from "@/utils/cn";
 import { Card } from "@/components/ui/Card";
 import { analyticsService } from "@/services/analytics.service";
 import { useEffect, useState } from "react";
-import { formatCount } from "@/lib/formatters";
+
 import { TrendLine } from "@/components/charts/TrendLine";
 
 interface Stat {

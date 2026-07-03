@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
-import { Trash2, ExternalLink } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 export default function SettingsPage() {
   const { user } = useAuth();

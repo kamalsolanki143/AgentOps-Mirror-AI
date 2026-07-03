@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Logo } from "@/components/common/Logo";
+
 import Link from "next/link";
 import { Mail, Lock, User } from "lucide-react";
 

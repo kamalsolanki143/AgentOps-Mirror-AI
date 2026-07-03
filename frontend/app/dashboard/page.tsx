@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
-import type { Metadata } from "next";
+
 
 import type { Variants } from "framer-motion";
 

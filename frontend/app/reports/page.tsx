@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { RiskBadge } from "@/components/common/RiskBadge";
 import { HealthRing } from "@/components/charts/HealthRing";
-import { Skeleton } from "@/components/ui/Skeleton";
+
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { formatDate } from "@/lib/formatters";

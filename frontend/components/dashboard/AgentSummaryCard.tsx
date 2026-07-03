@@ -4,19 +4,10 @@ import { cn } from "@/utils/cn";
 import { Card } from "@/components/ui/Card";
 import { HealthRing } from "@/components/charts/HealthRing";
 import { RiskBadge } from "@/components/common/RiskBadge";
-import { Badge } from "@/components/ui/Badge";
 import { ROUTES } from "@/constants/routes";
 import { formatRelative } from "@/lib/formatters";
 import { scoreToRiskLevel } from "@/utils/riskLevel";
 import type { Agent } from "@/types/agent.types";
-
-const STATUS_COLORS: Record<Agent["status"], string> = {
-  healthy: "text-accent",
-  warning: "text-risk-medium",
-  critical: "text-risk-critical",
-  idle: "text-ink-muted",
-  testing: "text-primary",
-};
 
 const STATUS_DOTS: Record<Agent["status"], string> = {
   healthy: "bg-accent",

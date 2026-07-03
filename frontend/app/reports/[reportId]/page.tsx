@@ -7,10 +7,9 @@ import { HealthRing } from "@/components/charts/HealthRing";
 import { RiskBadge } from "@/components/common/RiskBadge";
 import { Button } from "@/components/ui/Button";
 import { ROUTES } from "@/constants/routes";
-import { scoreToRiskLevel } from "@/utils/riskLevel";
 import type { Report } from "@/types/report.types";
-import { formatDate, formatDelta } from "@/lib/formatters";
-import { Download, GitBranch, MessageSquare } from "lucide-react";
+import { formatDate } from "@/lib/formatters";
+import { Download, GitBranch } from "lucide-react";
 import { cn } from "@/utils/cn";
 
 const SCORE_LABELS: Record<string, string> = {

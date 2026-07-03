@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ROUTES } from "@/constants/routes";
 import { ArrowRight, Zap, Shield, Brain, AlertTriangle } from "lucide-react";
 import { BUILT_IN_PERSONAS } from "@/constants/personaTypes";
-import { cn } from "@/utils/cn";
+
 
 // 9-step workflow
 const WORKFLOW_STEPS = [
