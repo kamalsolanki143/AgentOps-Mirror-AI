@@ -1,0 +1,77 @@
+{
+  "overview": {
+    "agentsConnected": 4,
+    "testsRunThisWeek": 12,
+    "avgHealthScore": 77,
+    "totalConversations": 284,
+    "criticalIssuesFound": 8,
+    "issuesResolvedThisWeek": 5
+  },
+  "trends": {
+    "hallucination": [
+      { "date": "2024-12-01", "value": 34 },
+      { "date": "2024-12-08", "value": 29 },
+      { "date": "2024-12-15", "value": 31 },
+      { "date": "2024-12-22", "value": 25 },
+      { "date": "2024-12-29", "value": 22 },
+      { "date": "2025-01-05", "value": 18 },
+      { "date": "2025-01-12", "value": 14 }
+    ],
+    "security": [
+      { "date": "2024-12-01", "value": 12 },
+      { "date": "2024-12-08", "value": 10 },
+      { "date": "2024-12-15", "value": 11 },
+      { "date": "2024-12-22", "value": 8 },
+      { "date": "2024-12-29", "value": 6 },
+      { "date": "2025-01-05", "value": 4 },
+      { "date": "2025-01-12", "value": 2 }
+    ],
+    "overallHealthScore": [
+      { "date": "2024-12-01", "value": 62 },
+      { "date": "2024-12-08", "value": 65 },
+      { "date": "2024-12-15", "value": 68 },
+      { "date": "2024-12-22", "value": 72 },
+      { "date": "2024-12-29", "value": 76 },
+      { "date": "2025-01-05", "value": 80 },
+      { "date": "2025-01-12", "value": 84 }
+    ]
+  },
+  "heatmap": [
+    { "persona": "Angry Customer", "week": "Week 1", "failureCount": 5 },
+    { "persona": "Prompt Injector", "week": "Week 1", "failureCount": 2 },
+    { "persona": "Fraudster", "week": "Week 1", "failureCount": 8 },
+    { "persona": "Discount Hunter", "week": "Week 1", "failureCount": 1 },
+    { "persona": "Angry Customer", "week": "Week 2", "failureCount": 4 },
+    { "persona": "Prompt Injector", "week": "Week 2", "failureCount": 1 },
+    { "persona": "Fraudster", "week": "Week 2", "failureCount": 6 },
+    { "persona": "Discount Hunter", "week": "Week 2", "failureCount": 2 },
+    { "persona": "Hallucination Bait", "week": "Week 1", "failureCount": 7 },
+    { "persona": "Hallucination Bait", "week": "Week 2", "failureCount": 5 }
+  ],
+  "versionComparison": [
+    {
+      "version": "v2.1",
+      "runDate": "2024-12-01",
+      "overall": 62,
+      "reliability": 70,
+      "security": 45,
+      "hallucination": 55
+    },
+    {
+      "version": "v2.2",
+      "runDate": "2024-12-22",
+      "overall": 72,
+      "reliability": 78,
+      "security": 60,
+      "hallucination": 68
+    },
+    {
+      "version": "v2.3",
+      "runDate": "2025-01-15",
+      "overall": 84,
+      "reliability": 91,
+      "security": 76,
+      "hallucination": 72
+    }
+  ]
+}
