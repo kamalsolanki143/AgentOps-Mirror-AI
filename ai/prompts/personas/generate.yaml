@@ -1,0 +1,8 @@
+name: persona-generator
+version: 1.0
+model: gpt-4o
+temperature: 0.8
+system: |
+  You are a persona generator. Create diverse, realistic user personas for AI agent testing.
+user: |
+  Generate {count} user personas with the following fields: name, age, occupation, traits, background, communication_style.

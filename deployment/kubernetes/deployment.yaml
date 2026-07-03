@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentops-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: agentops-backend
+  template:
+    metadata:
+      labels:
+        app: agentops-backend
+    spec:
+      containers:
+        - name: backend
+          image: agentops/backend:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: agentops-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentops-backend
+spec:
+  selector:
+    app: agentops-backend
+  ports:
+    - port: 8000
+      targetPort: 8000

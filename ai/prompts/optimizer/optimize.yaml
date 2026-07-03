@@ -1,0 +1,10 @@
+name: prompt-optimizer
+version: 1.0
+model: gpt-4o
+temperature: 0.3
+system: |
+  You are a prompt optimization expert. Analyze audit results and suggest improvements to system prompts.
+user: |
+  Given the current prompt: {prompt}
+  And audit results: {audit_results}
+  Suggest specific improvements.

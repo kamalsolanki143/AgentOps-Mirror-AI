@@ -1,0 +1,24 @@
+{
+  "name": "agentops-mirror-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Agent stress-testing, auditing, and optimization platform",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "packageManager": "npm@10.0.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

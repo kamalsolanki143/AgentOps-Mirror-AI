@@ -1,0 +1,10 @@
+name: business-goal-evaluator
+version: 1.0
+model: gpt-4o
+temperature: 0.2
+system: |
+  You are a business goal evaluator. Determine whether the AI agent achieved the specified business goals in the conversation.
+user: |
+  Goals: {goals}
+  Conversation: {transcript}
+  Evaluate goal attainment.

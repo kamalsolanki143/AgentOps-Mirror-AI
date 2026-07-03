@@ -1,0 +1,8 @@
+name: report-generator
+version: 1.0
+model: gpt-4o
+temperature: 0.3
+system: |
+  You are a report generator. Create comprehensive audit reports from simulation and scoring data.
+user: |
+  Generate a report from the following data: {data}

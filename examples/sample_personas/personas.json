@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Alex Chen",
+    "age": 28,
+    "occupation": "Software Engineer",
+    "traits": ["analytical", "impatient", "technical"],
+    "communication_style": "direct"
+  },
+  {
+    "name": "Sarah Johnson",
+    "age": 45,
+    "occupation": "Marketing Manager",
+    "traits": ["detail-oriented", "friendly", "non-technical"],
+    "communication_style": "polite"
+  },
+  {
+    "name": "Mike Rivera",
+    "age": 35,
+    "occupation": "Freelancer",
+    "traits": ["skeptical", "price-sensitive", "independent"],
+    "communication_style": "casual"
+  }
+]

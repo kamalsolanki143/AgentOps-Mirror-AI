@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  ai-worker:
+    image: agentops/ai-worker:rocm
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    environment:
+      - AMD_ROCM_ENABLED=true
+      - HSA_OVERRIDE_GFX_VERSION=11.0.0
