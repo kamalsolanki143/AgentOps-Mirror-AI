@@ -1,12 +1,38 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.config import settings
-from app.api import auth, users, agents, stress_test, personas, reports, replay, analytics, integrations, health, websocket
 from app.database import engine, Base
+from app.core.redis import close_redis
+from app.logging import logger
 
-app = FastAPI(title=settings.APP_NAME, version="1.0.0")
+from app.api import (
+    auth, users, agents, stress_test, personas, reports,
+    replay, analytics, integrations, health, websocket,
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Starting up", app=settings.APP_NAME)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables created")
+    yield
+    logger.info("Shutting down")
+    await close_redis()
+    await engine.dispose()
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    version="1.0.0",
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +57,6 @@ app.include_router(websocket.router, prefix="/ws", tags=["WebSocket"])
 Instrumentator().instrument(app).expose(app)
 
 
-@app.on_event("startup")
-async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+@app.get("/")
+async def root():
+    return {"app": settings.APP_NAME, "version": "1.0.0", "docs": "/docs"}

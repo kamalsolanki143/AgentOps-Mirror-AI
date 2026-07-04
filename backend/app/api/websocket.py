@@ -1,22 +1,26 @@
+import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from typing import set
+from app.services.websocket_service import manager, listen_redis_pubsub
 
 router = APIRouter()
 
-active_connections: dict[str, set[WebSocket]] = {}
 
-
-@router.websocket("/{test_id}")
-async def websocket_endpoint(websocket: WebSocket, test_id: str):
-    await websocket.accept()
-    if test_id not in active_connections:
-        active_connections[test_id] = set()
-    active_connections[test_id].add(websocket)
-
+@router.websocket("/run/{run_id}")
+async def websocket_run(websocket: WebSocket, run_id: str):
+    await manager.connect(run_id, websocket)
+    listener_task = asyncio.create_task(listen_redis_pubsub(run_id))
     try:
+        await manager.send_personal(run_id, websocket, {
+            "event": "connected",
+            "run_id": run_id,
+            "message": "Listening for run updates",
+        })
         while True:
-            await websocket.receive_text()
+            data = await websocket.receive_text()
+            if data == "ping":
+                await manager.send_personal(run_id, websocket, {"event": "pong"})
     except WebSocketDisconnect:
-        active_connections[test_id].discard(websocket)
-        if not active_connections[test_id]:
-            del active_connections[test_id]
+        pass
+    finally:
+        listener_task.cancel()
+        manager.disconnect(run_id, websocket)
