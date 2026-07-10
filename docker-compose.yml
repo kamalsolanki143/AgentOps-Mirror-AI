@@ -1,8 +1,7 @@
-version: "3.9"
-
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: agentops-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -11,69 +10,153 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - agentops-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d agentops"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   redis:
     image: redis:7-alpine
+    container_name: agentops-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - agentops-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: agentops-backend
     ports:
       - "8000:8000"
-    env_file: .env
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/agentops
+      - DATABASE_URL_SYNC=postgresql://postgres:postgres@postgres:5432/agentops
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - agentops-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/ready')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: agentops-frontend
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    networks:
+      - agentops-net
+    restart: unless-stopped
 
   ai-worker:
     build:
       context: ./ai
       dockerfile: Dockerfile
-    env_file: .env
+    container_name: agentops-ai-worker
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/agentops
+      - DATABASE_URL_SYNC=postgresql://postgres:postgres@postgres:5432/agentops
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
-      - redis
-      - backend
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - agentops-net
+    restart: "no"
 
   audit-worker:
     build:
       context: ./audit-engine
       dockerfile: Dockerfile
-    env_file: .env
+    container_name: agentops-audit-worker
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/agentops
+      - DATABASE_URL_SYNC=postgresql://postgres:postgres@postgres:5432/agentops
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
-      - redis
-      - backend
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - agentops-net
+    restart: "no"
 
   prometheus:
     image: prom/prometheus:latest
+    container_name: agentops-prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./monitoring/prometheus:/etc/prometheus
+    networks:
+      - agentops-net
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
+    container_name: agentops-grafana
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - prometheus
       - loki
+    networks:
+      - agentops-net
+    restart: unless-stopped
 
   loki:
     image: grafana/loki:latest
+    container_name: agentops-loki
     ports:
       - "3100:3100"
+    networks:
+      - agentops-net
+    restart: unless-stopped
+
+networks:
+  agentops-net:
+    driver: bridge
 
 volumes:
   pgdata:
+    driver: local
+  redisdata:
+    driver: local
