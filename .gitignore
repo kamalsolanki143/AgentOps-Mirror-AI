@@ -47,3 +47,14 @@ docker-data/
 *.pt
 *.pkl
 *.h5
+
+# Python virtual environment
+.venv/
+backend/.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment
+.env
