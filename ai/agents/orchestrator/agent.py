@@ -8,14 +8,15 @@ import logging
 from typing import Any, Dict, TypedDict
 
 # Imports of local agents
-from ai.agents.persona_generator.agent import PersonaGenerator
-from ai.agents.simulator.agent import Simulator
-from ai.agents.transcript_collector.agent import TranscriptCollector
-from ai.agents.audit_engine.agent import AuditEngine
-from ai.agents.risk_scorer.agent import RiskScorer
-from ai.agents.prompt_optimizer.agent import PromptOptimizer
-from ai.agents.regression_engine.agent import RegressionEngine
-from ai.agents.report_generator.agent import ReportGenerator
+from agents.persona_generator.agent import PersonaGenerator
+from agents.simulator.agent import Simulator
+from agents.transcript_collector.agent import TranscriptCollector
+from agents.audit_engine.agent import AuditEngine
+from agents.risk_scorer.agent import RiskScorer
+from agents.prompt_optimizer.agent import PromptOptimizer
+from agents.regression_engine.agent import RegressionEngine
+from agents.report_generator.agent import ReportGenerator
+
 
 logger = logging.getLogger("ai.orchestrator")
 

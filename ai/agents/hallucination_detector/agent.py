@@ -5,7 +5,7 @@ Hallucination Detector – identifies factually incorrect responses.
 import json
 import logging
 from typing import Any, Dict
-from ai.models.llm_client import LLMClient
+from models.llm_client import LLMClient
 
 logger = logging.getLogger("ai.hallucination_detector")
 

@@ -5,10 +5,11 @@ Audit Engine – orchestrates multi-dimensional scoring.
 import asyncio
 import logging
 from typing import Any, Dict
-from ai.agents.hallucination_detector.agent import HallucinationDetector
-from ai.agents.prompt_leak_detector.agent import PromptLeakDetector
-from ai.agents.jailbreak_detector.agent import JailbreakDetector
-from ai.agents.business_goal_evaluator.agent import BusinessGoalEvaluator
+from agents.hallucination_detector.agent import HallucinationDetector
+from agents.prompt_leak_detector.agent import PromptLeakDetector
+from agents.jailbreak_detector.agent import JailbreakDetector
+from agents.business_goal_evaluator.agent import BusinessGoalEvaluator
+
 
 logger = logging.getLogger("ai.audit_engine_agent")
 

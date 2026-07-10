@@ -5,7 +5,7 @@ Prompt Optimizer – suggests improvements to system prompts based on audit resu
 import json
 import logging
 from typing import Any, Dict
-from ai.models.llm_client import LLMClient
+from models.llm_client import LLMClient
 
 logger = logging.getLogger("ai.prompt_optimizer")
 

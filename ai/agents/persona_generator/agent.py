@@ -5,7 +5,7 @@ Persona Generator – creates diverse user personas for simulation.
 import json
 import logging
 from pydantic import BaseModel
-from ai.models.llm_client import LLMClient
+from models.llm_client import LLMClient
 
 logger = logging.getLogger("ai.persona_generator")
 

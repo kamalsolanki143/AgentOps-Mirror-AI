@@ -97,7 +97,7 @@ services:
         condition: service_healthy
     networks:
       - agentops-net
-    restart: "no"
+    restart: unless-stopped
 
   audit-worker:
     build:
