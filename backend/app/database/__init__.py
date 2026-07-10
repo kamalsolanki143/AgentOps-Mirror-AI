@@ -16,3 +16,14 @@ async def get_db() -> AsyncSession:
             yield session
         finally:
             await session.close()
+
+
+async def check_db_connection() -> bool:
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(
+                __import__("sqlalchemy").text("SELECT 1")
+            )
+        return True
+    except Exception:
+        return False
