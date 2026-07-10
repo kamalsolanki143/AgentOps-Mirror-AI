@@ -1,0 +1,23 @@
+{
+  "batch_id": "batch-stress-999",
+  "timestamp": 1799999999,
+  "concurrency_limit": 5,
+  "results": [
+    {
+      "session_id": "session-angry-001",
+      "success": true,
+      "overall_score": 0.88
+    },
+    {
+      "session_id": "session-injector-002",
+      "success": false,
+      "overall_score": 0.35
+    }
+  ],
+  "statistics": {
+    "total_runs": 2,
+    "success_rate": 0.5,
+    "avg_latency": 0.85,
+    "failed_runs": 1
+  }
+}
