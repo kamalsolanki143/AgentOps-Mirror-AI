@@ -30,12 +30,23 @@ export default function ReplayPage({ params }: ReplayPageProps) {
   const [replay, setReplay] = useState<ConversationReplay | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    reportsService.getConversation(conversationId).then((data) => {
-      setReplay(data);
-      setCurrentStep(data.messages.length - 1); // Show all by default
-    });
+    setLoading(true);
+    setError(null);
+    reportsService.getConversation(conversationId)
+      .then((data) => {
+        setReplay(data);
+        setCurrentStep(data.messages.length - 1); // Show all by default
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading replay:", err);
+        setError("Failed to load conversation replay details.");
+        setLoading(false);
+      });
   }, [conversationId]);
 
   useEffect(() => {
@@ -48,7 +59,25 @@ export default function ReplayPage({ params }: ReplayPageProps) {
     return () => clearTimeout(timer);
   }, [playing, currentStep, replay]);
 
-  if (!replay) return null;
+  if (loading) {
+    return (
+      <div className="page-container max-w-5xl">
+        <PageHeader title="Loading Replay..." />
+        <div className="h-64 rounded-2xl bg-[#F3F4F6] animate-pulse" />
+      </div>
+    );
+  }
+
+  if (error || !replay) {
+    return (
+      <div className="page-container max-w-5xl">
+        <PageHeader title="Error" />
+        <Card className="p-8 border-red-200 bg-red-50/30 text-center">
+          <p className="text-sm text-ink-muted">{error || "Conversation replay not found."}</p>
+        </Card>
+      </div>
+    );
+  }
 
   const visibleMessages = replay.messages.slice(0, currentStep + 1);
   const activeMessage = replay.messages[currentStep];

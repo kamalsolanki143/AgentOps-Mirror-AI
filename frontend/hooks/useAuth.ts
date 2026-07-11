@@ -3,16 +3,7 @@ import { useState, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
-
-// Mock user for demo
-const MOCK_USER = {
-  id: "user-001",
-  name: "Muskan Yeshminali",
-  email: "muskan@agentops.ai",
-  role: "admin" as const,
-  orgName: "AgentOps Demo",
-  avatarUrl: undefined,
-};
+import { authService } from "@/services/auth.service";
 
 export function useAuth() {
   const { user, isAuthenticated, setUser, clearAuth } = useAppStore();
@@ -25,13 +16,9 @@ export function useAuth() {
       setLoading(true);
       setError(null);
       try {
-        // Simulate API call
-        await new Promise((r) => setTimeout(r, 800));
-        if (password.length < 6) {
-          throw new Error("Invalid credentials");
-        }
-        const mockToken = `mock-jwt-${Date.now()}`;
-        setUser({ ...MOCK_USER, email }, mockToken);
+        const response = await authService.login(email, password);
+        const { access_token, refresh_token, ...userData } = response;
+        setUser({ ...userData } as any, access_token, refresh_token);
         router.push(ROUTES.DASHBOARD);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Login failed");
@@ -47,12 +34,19 @@ export function useAuth() {
       setLoading(true);
       setError(null);
       try {
-        await new Promise((r) => setTimeout(r, 1000));
-        if (password.length < 6) {
-          throw new Error("Password must be at least 6 characters");
+        let response;
+        try {
+          response = await authService.register(name, email, password);
+        } catch (err: any) {
+          if (err.status === 409 || (err.message && err.message.includes("409"))) {
+            console.log("User already exists, attempting automatic login...");
+            response = await authService.login(email, password);
+          } else {
+            throw err;
+          }
         }
-        const mockToken = `mock-jwt-${Date.now()}`;
-        setUser({ ...MOCK_USER, name, email }, mockToken);
+        const { access_token, refresh_token, ...userData } = response;
+        setUser({ ...userData } as any, access_token, refresh_token);
         router.push(ROUTES.DASHBOARD);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Registration failed");

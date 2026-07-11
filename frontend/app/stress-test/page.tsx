@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { stressTestService } from "@/services/stressTest.service";
 import { personasService } from "@/services/personas.service";
+import { agentsService } from "@/services/agents.service";
 import { ROUTES } from "@/constants/routes";
 import { useEffect } from "react";
 import type { Persona } from "@/types/persona.types";
@@ -36,17 +37,33 @@ const DIFFICULTY_OPTIONS = [
 export default function StressTestLaunchPage() {
   const router = useRouter();
   const [personas, setPersonas] = useState<Persona[]>([]);
+  const [agents, setAgents] = useState<any[]>([]);
   const [selectedConnector, setSelectedConnector] = useState("rest_api");
   const [selectedPersonas, setSelectedPersonas] = useState<string[]>([]);
   const [endpoint, setEndpoint] = useState("");
   const [difficulty, setDifficulty] = useState("hard");
   const [launching, setLaunching] = useState(false);
+  const [loadingPersonas, setLoadingPersonas] = useState(true);
+  const [errorPersonas, setErrorPersonas] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoadingPersonas(true);
+    setErrorPersonas(null);
     personasService.list().then((data) => {
-      setPersonas(data.personas);
+      setPersonas(data.personas || []);
       // Default to first 6 personas selected
-      setSelectedPersonas(data.personas.slice(0, 6).map((p) => p.id));
+      setSelectedPersonas((data.personas || []).slice(0, 6).map((p) => p.id));
+      setLoadingPersonas(false);
+    }).catch((err) => {
+      console.error("Failed to load personas:", err);
+      setErrorPersonas("Failed to load personas. Please ensure the backend is healthy.");
+      setLoadingPersonas(false);
+    });
+
+    agentsService.list().then((data) => {
+      setAgents(data.agents || []);
+    }).catch((err) => {
+      console.error("Failed to load agents:", err);
     });
   }, []);
 
@@ -58,9 +75,10 @@ export default function StressTestLaunchPage() {
 
   const handleLaunch = async () => {
     setLaunching(true);
+    const firstAgentId = agents.length > 0 ? agents[0].id : null;
     try {
       const { runId } = await stressTestService.launch({
-        agentId: "agent-001",
+        agentId: firstAgentId,
         selectedPersonaIds: selectedPersonas,
         difficulty: difficulty as "easy" | "medium" | "hard" | "extreme",
         conversationsPerPersona: 3,
@@ -138,62 +156,78 @@ export default function StressTestLaunchPage() {
             </div>
           </CardHeader>
           <CardBody>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {personas.map((persona) => {
-                const selected = selectedPersonas.includes(persona.id);
-                return (
-                  <button
-                    key={persona.id}
-                    onClick={() => togglePersona(persona.id)}
-                    className={cn(
-                      "flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
-                      selected
-                        ? "border-primary bg-primary/5"
-                        : "border-[#E5E7EB] hover:border-primary/30"
-                    )}
-                  >
-                    <span
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-xl flex-shrink-0"
-                      style={{ backgroundColor: `${persona.color}20` }}
-                    >
-                      {persona.emoji}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-ink truncate">
-                          {persona.name}
-                        </span>
-                        <Badge
-                          size="sm"
-                          variant={
-                            persona.difficulty === "extreme" ? "primary" :
-                            persona.difficulty === "high" ? "risk" : "default"
-                          }
-                        >
-                          {persona.difficulty}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-ink-muted truncate mt-0.5">
-                        {persona.goal.description}
-                      </p>
-                    </div>
-                    <div
+            {loadingPersonas ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
+                ))}
+              </div>
+            ) : errorPersonas ? (
+              <div className="p-4 rounded-xl border border-red-200 bg-red-50/30 text-center text-xs text-ink-muted">
+                {errorPersonas}
+              </div>
+            ) : personas.length === 0 ? (
+              <div className="p-4 text-center text-xs text-ink-muted">
+                No personas found.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {personas.map((persona) => {
+                  const selected = selectedPersonas.includes(persona.id);
+                  return (
+                    <button
+                      key={persona.id}
+                      onClick={() => togglePersona(persona.id)}
                       className={cn(
-                        "w-4 h-4 rounded flex-shrink-0 border-2 transition-all",
-                        selected ? "bg-primary border-primary" : "border-[#D1D5DB]"
+                        "flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
+                        selected
+                          ? "border-primary bg-primary/5"
+                          : "border-[#E5E7EB] hover:border-primary/30"
                       )}
                     >
-                      {selected && (
-                        <svg viewBox="0 0 16 16" fill="none" className="text-white">
-                          <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                      <span
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-xl flex-shrink-0"
+                        style={{ backgroundColor: `${persona.color}20` }}
+                      >
+                        {persona.emoji}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-ink truncate">
+                            {persona.name}
+                          </span>
+                          <Badge
+                            size="sm"
+                            variant={
+                              persona.difficulty === "extreme" ? "primary" :
+                              persona.difficulty === "high" ? "risk" : "default"
+                            }
+                          >
+                            {persona.difficulty}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-ink-muted truncate mt-0.5">
+                          {persona.goal.description}
+                        </p>
+                      </div>
+                      <div
+                        className={cn(
+                          "w-4 h-4 rounded flex-shrink-0 border-2 transition-all",
+                          selected ? "bg-primary border-primary" : "border-[#D1D5DB]"
+                        )}
+                      >
+                        {selected && (
+                          <svg viewBox="0 0 16 16" fill="none" className="text-white">
+                            <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </CardBody>
         </Card>
 

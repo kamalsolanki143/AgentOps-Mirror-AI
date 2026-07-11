@@ -30,6 +30,7 @@ export interface Persona {
   successRate?: number; // % of time this persona catches issues
   createdAt: string;
   isBuiltIn: boolean;
+  isActive: boolean;
 }
 
 export interface PersonaListResponse {

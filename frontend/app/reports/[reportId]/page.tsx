@@ -28,12 +28,43 @@ interface ReportDetailPageProps {
 export default function ReportDetailPage({ params }: ReportDetailPageProps) {
   const { reportId } = use(params);
   const [report, setReport] = useState<Report | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    reportsService.getById(reportId).then(setReport);
+    setLoading(true);
+    setError(null);
+    reportsService.getById(reportId)
+      .then((data) => {
+        setReport(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading report:", err);
+        setError("Failed to load report details.");
+        setLoading(false);
+      });
   }, [reportId]);
 
-  if (!report) return null;
+  if (loading) {
+    return (
+      <div className="page-container max-w-5xl">
+        <PageHeader title="Loading Report..." />
+        <div className="h-64 rounded-2xl bg-[#F3F4F6] animate-pulse" />
+      </div>
+    );
+  }
+
+  if (error || !report) {
+    return (
+      <div className="page-container max-w-5xl">
+        <PageHeader title="Error" />
+        <Card className="p-8 border-red-200 bg-red-50/30 text-center">
+          <p className="text-sm text-ink-muted">{error || "Report not found."}</p>
+        </Card>
+      </div>
+    );
+  }
 
   const scoreEntries = Object.entries(report.scores).filter(([k]) => k !== "overall") as [string, number][];
 

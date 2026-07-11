@@ -1,6 +1,6 @@
 // ── Stress Test Run Types ─────────────────────────────────────────────────
 
-export type RunStatus = "queued" | "running" | "complete" | "failed" | "cancelled";
+export type RunStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 
 export type RiskLevel = "critical" | "medium" | "low" | "safe";
 

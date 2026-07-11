@@ -1,5 +1,5 @@
 "use client";
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import { useStressTest } from "@/hooks/useStressTest";
 import { HealthRing } from "@/components/charts/HealthRing";
 import { Card } from "@/components/ui/Card";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ROUTES } from "@/constants/routes";
 import { formatDuration } from "@/lib/formatters";
+import { reportsService } from "@/services/reports.service";
 
 import { cn } from "@/utils/cn";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,9 +22,24 @@ interface LiveRunPageProps {
 
 export default function LiveRunPage({ params }: LiveRunPageProps) {
   const { runId } = use(params);
-  const { run, loading } = useStressTest(runId);
+  const { run, loading, error } = useStressTest(runId);
+  const [reportId, setReportId] = useState<string | null>(null);
 
-  if (loading || !run) {
+  const isRunning = run?.status === "running";
+  const isComplete = run?.status === "completed";
+
+  useEffect(() => {
+    if (isComplete && run) {
+      reportsService.list().then((res) => {
+        const found = res.reports.find((r) => r.runId === run.id);
+        if (found) {
+          setReportId(found.id);
+        }
+      }).catch(err => console.error("Error fetching reports:", err));
+    }
+  }, [isComplete, run]);
+
+  if (loading && !run) {
     return (
       <div className="page-container flex items-center justify-center min-h-[60vh]">
         <HealthRing score={0} size="lg" running gradientId="loading-ring" label="Loading…" />
@@ -31,11 +47,20 @@ export default function LiveRunPage({ params }: LiveRunPageProps) {
     );
   }
 
-  const isRunning = run.status === "running";
-  const isComplete = run.status === "complete";
-  const progress = Math.round(
-    (run.metrics.completedConversations / run.metrics.totalConversations) * 100
-  );
+  if (error || !run) {
+    return (
+      <div className="page-container">
+        <PageHeader title="Error" />
+        <Card className="p-8 border-red-200 bg-red-50/30 text-center max-w-xl mx-auto my-12">
+          <p className="text-sm text-ink-muted">Error loading stress test: {error || "Test run not found."}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  const progress = run.metrics.totalConversations > 0
+    ? Math.round((run.metrics.completedConversations / run.metrics.totalConversations) * 100)
+    : 0;
 
   return (
     <div className="page-container">
@@ -47,12 +72,20 @@ export default function LiveRunPage({ params }: LiveRunPageProps) {
           { label: run.id },
         ]}
         action={
-          isComplete && run.id === "run-001" ? (
-            <Link href={ROUTES.REPORT_DETAIL("report-001")}>
-              <Button variant="gradient" leftIcon={<FileText className="w-4 h-4" />}>
-                View Report
-              </Button>
-            </Link>
+          isComplete ? (
+            reportId ? (
+              <Link href={ROUTES.REPORT_DETAIL(reportId)}>
+                <Button variant="gradient" leftIcon={<FileText className="w-4 h-4" />}>
+                  View Report
+                </Button>
+              </Link>
+            ) : (
+              <Link href={ROUTES.REPORTS}>
+                <Button variant="gradient" leftIcon={<FileText className="w-4 h-4" />}>
+                  View Reports
+                </Button>
+              </Link>
+            )
           ) : isRunning ? (
             <Button variant="danger" leftIcon={<StopCircle className="w-4 h-4" />}>
               Cancel Run

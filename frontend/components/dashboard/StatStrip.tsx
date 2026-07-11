@@ -20,40 +20,34 @@ export function StatStrip() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    analyticsService.getAll().then((data) => {
-      const { overview, trends } = data;
+    analyticsService.getDashboard().then((dashboard) => {
       setStats([
         {
-          label: "Agents Connected",
-          value: overview.agentsConnected,
-          delta: "+1 this month",
-          positive: true,
-        },
-        {
           label: "Tests This Week",
-          value: overview.testsRunThisWeek,
+          value: dashboard.total_runs,
           delta: "+3 vs last week",
           positive: true,
-          trend: trends.overallHealthScore,
-          trendColor: "#6C5CE7",
         },
         {
           label: "Avg Health Score",
-          value: `${overview.avgHealthScore}%`,
+          value: `${dashboard.average_score || 0}%`,
           delta: "+5.2 pts this week",
           positive: true,
-          trend: trends.overallHealthScore,
-          trendColor: "#00C2A8",
         },
         {
-          label: "Critical Issues Found",
-          value: overview.criticalIssuesFound,
-          delta: `${overview.issuesResolvedThisWeek} resolved`,
+          label: "Completed Runs",
+          value: dashboard.completed_runs,
+          positive: true,
+        },
+        {
+          label: "Failed Runs",
+          value: dashboard.failed_runs,
           positive: false,
-          trend: trends.security,
-          trendColor: "#FF5A5F",
         },
       ]);
+      setLoading(false);
+    }).catch(err => {
+      console.error("Failed to load stat strip data:", err);
       setLoading(false);
     });
   }, []);

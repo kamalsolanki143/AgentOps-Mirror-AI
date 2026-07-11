@@ -7,6 +7,16 @@ from app.dependencies import get_current_user
 router = APIRouter()
 
 
+@router.get("/")
+async def get_analytics(
+    user_data: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user_id = int(user_data["sub"])
+    service = AnalyticsService(db)
+    return await service.get_full_analytics(user_id)
+
+
 @router.get("/dashboard")
 async def dashboard(
     user_data: dict = Depends(get_current_user),
@@ -45,4 +55,8 @@ async def time_series(
 ):
     user_id = int(user_data["sub"])
     service = AnalyticsService(db)
-    return await service.get_time_series(user_id, days)
+    try:
+        return await service.get_time_series(user_id, days)
+    except Exception as e:
+        import traceback
+        return {"error": str(e), "traceback": traceback.format_exc()}

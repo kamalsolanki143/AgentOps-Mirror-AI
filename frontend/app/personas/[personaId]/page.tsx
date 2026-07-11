@@ -16,12 +16,43 @@ interface PersonaDetailPageProps {
 export default function PersonaDetailPage({ params }: PersonaDetailPageProps) {
   const { personaId } = use(params);
   const [persona, setPersona] = useState<Persona | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    personasService.getById(personaId).then(setPersona);
+    setLoading(true);
+    setError(null);
+    personasService.getById(personaId)
+      .then((data) => {
+        setPersona(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading persona:", err);
+        setError("Failed to load persona details.");
+        setLoading(false);
+      });
   }, [personaId]);
 
-  if (!persona) return null;
+  if (loading) {
+    return (
+      <div className="page-container max-w-3xl">
+        <PageHeader title="Loading Persona..." />
+        <div className="h-64 rounded-2xl bg-[#F3F4F6] animate-pulse" />
+      </div>
+    );
+  }
+
+  if (error || !persona) {
+    return (
+      <div className="page-container max-w-3xl">
+        <PageHeader title="Error" />
+        <Card className="p-8 border-red-200 bg-red-50/30 text-center">
+          <p className="text-sm text-ink-muted">{error || "Persona not found."}</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container max-w-3xl">

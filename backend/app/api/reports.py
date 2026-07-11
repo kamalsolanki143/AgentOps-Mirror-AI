@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
-from app.schemas.report import ReportResponse
+from app.schemas.report import ReportResponse, ReportListResponse
 from app.services.report_service import ReportService
 from app.dependencies import get_current_user
 
@@ -20,10 +20,10 @@ async def generate_report(
     report = await service.generate(user_id, run_id, title)
     if not report:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Run not found")
-    return report
+    return await service.get_report_detail(report)
 
 
-@router.get("/", response_model=list[ReportResponse])
+@router.get("/", response_model=ReportListResponse)
 async def list_reports(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
@@ -32,7 +32,16 @@ async def list_reports(
 ):
     user_id = int(user_data["sub"])
     service = ReportService(db)
-    return await service.list_by_user(user_id, skip=skip, limit=limit)
+    reports = await service.list_by_user(user_id, skip=skip, limit=limit)
+    
+    formatted = [await service.get_report_detail(r) for r in reports]
+    
+    # Get total count of reports
+    from sqlalchemy import select, func
+    from app.models.report import Report
+    total = await db.scalar(select(func.count(Report.id)).where(Report.user_id == user_id)) or 0
+    
+    return {"reports": formatted, "total": total}
 
 
 @router.get("/{report_id}", response_model=ReportResponse)
@@ -45,4 +54,4 @@ async def get_report(
     report = await service.get_by_id(report_id)
     if not report:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Report not found")
-    return report
+    return await service.get_report_detail(report)

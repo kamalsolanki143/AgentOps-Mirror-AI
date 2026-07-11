@@ -30,7 +30,7 @@ interface AppState {
   sidebarCollapsed: boolean;
 
   // Actions — Auth
-  setUser: (user: User, token: string) => void;
+  setUser: (user: User, token: string, refreshToken?: string) => void;
   clearAuth: () => void;
 
   // Actions — Context
@@ -54,11 +54,15 @@ export const useAppStore = create<AppState>()(
       sidebarCollapsed: false,
 
       // Auth actions
-      setUser: (user, token) => {
+      setUser: (user, token, refreshToken) => {
         // Also write token to localStorage for apiClient + cookie for middleware
         if (typeof window !== "undefined") {
           localStorage.setItem("agentops_token", token);
           document.cookie = `agentops_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+          if (refreshToken) {
+            localStorage.setItem("agentops_refresh_token", refreshToken);
+            document.cookie = `agentops_refresh_token=${refreshToken}; path=/; max-age=${60 * 60 * 24 * 7}`;
+          }
         }
         set({ user, token, isAuthenticated: true });
       },
@@ -66,7 +70,9 @@ export const useAppStore = create<AppState>()(
       clearAuth: () => {
         if (typeof window !== "undefined") {
           localStorage.removeItem("agentops_token");
+          localStorage.removeItem("agentops_refresh_token");
           document.cookie = "agentops_token=; path=/; max-age=0";
+          document.cookie = "agentops_refresh_token=; path=/; max-age=0";
         }
         set({
           user: null,

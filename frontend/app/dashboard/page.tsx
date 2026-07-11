@@ -28,7 +28,7 @@ const item: Variants = {
 };
 
 export default function DashboardPage() {
-  const { agents, loading } = useAgents();
+  const { agents, loading, error } = useAgents();
 
   return (
     <div className="page-container">
@@ -59,6 +59,17 @@ export default function DashboardPage() {
               {[...Array(4)].map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
+            </div>
+          ) : error ? (
+            <div className="p-8 border border-red-200 bg-red-50/20 rounded-2xl text-center text-sm text-ink-muted">
+              Failed to load agents: {error}
+            </div>
+          ) : agents.length === 0 ? (
+            <div className="p-8 border border-dashed border-[#E5E7EB] rounded-2xl text-center">
+              <p className="text-sm text-ink-muted mb-4">No connected agents found.</p>
+              <Link href={ROUTES.INTEGRATIONS}>
+                <Button variant="secondary" size="sm">Connect Your First Agent</Button>
+              </Link>
             </div>
           ) : (
             <motion.div

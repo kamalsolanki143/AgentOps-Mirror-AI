@@ -1,6 +1,8 @@
+import { useAppStore } from "@/store/useAppStore";
+
 // ── API Client ────────────────────────────────────────────────────────────
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BASE_URL = "http://127.0.0.1:8000";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -35,6 +37,8 @@ class ApiClientError extends Error {
  */
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
+  const storeToken = useAppStore.getState().token;
+  if (storeToken) return storeToken;
   return localStorage.getItem("agentops_token");
 }
 
@@ -62,6 +66,13 @@ async function request<T>(
   });
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      if (typeof window !== "undefined") {
+        useAppStore.getState().clearAuth();
+        window.location.href = "/login";
+      }
+    }
+
     let detail: unknown;
     try {
       detail = await response.json();

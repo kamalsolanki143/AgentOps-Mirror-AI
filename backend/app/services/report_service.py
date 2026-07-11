@@ -52,6 +52,113 @@ class ReportService:
         result = await self.db.execute(select(Report).where(Report.id == report_id))
         return result.scalar_one_or_none()
 
+    async def get_report_detail(self, report: Report) -> dict:
+        from app.models.stress_test_run import StressTestRun
+        from app.models.agent import Agent
+        from app.models.finding import Finding
+        from app.models.risk_score import RiskScore
+        from app.models.conversation import Conversation
+        
+        # Get run
+        run_res = await self.db.execute(select(StressTestRun).where(StressTestRun.id == report.stress_test_run_id))
+        run = run_res.scalar_one()
+
+        # Get agent
+        agent_name = "Unknown Agent"
+        agent_id = ""
+        if run.agent_id:
+            agent_res = await self.db.execute(select(Agent).where(Agent.id == run.agent_id))
+            agent = agent_res.scalar_one_or_none()
+            if agent:
+                agent_name = agent.name
+                agent_id = str(agent.id)
+
+        # Get risk scores
+        rs_res = await self.db.execute(select(RiskScore).where(RiskScore.stress_test_run_id == run.id))
+        risk_scores = list(rs_res.scalars().all())
+        scores_dict = {rs.category: int(rs.score * 100) for rs in risk_scores}
+
+        # Build score breakdown
+        scores = {
+            "reliability": scores_dict.get("reliability", 85),
+            "security": scores_dict.get("security", 80),
+            "businessGoal": scores_dict.get("business_goal", 75),
+            "hallucination": scores_dict.get("hallucination", 90),
+            "quality": scores_dict.get("quality", 85),
+            "latency": scores_dict.get("latency", 90),
+            "overall": int(run.overall_score * 100) if run.overall_score is not None else 80,
+        }
+
+        # Get findings (risks)
+        f_res = await self.db.execute(select(Finding).where(Finding.stress_test_run_id == run.id))
+        findings = list(f_res.scalars().all())
+
+        critical = sum(1 for f in findings if f.severity == "critical")
+        medium = sum(1 for f in findings if f.severity == "medium")
+        low = sum(1 for f in findings if f.severity == "low")
+        safe = 0
+
+        risk_summary = {
+            "critical": critical,
+            "medium": medium,
+            "low": low,
+            "safe": safe,
+        }
+
+        # Format risks list
+        risks = []
+        for f in findings:
+            persona_name = "System"
+            persona_emoji = "🤖"
+            persona_id = ""
+            message_excerpt = ""
+
+            if f.conversation_id:
+                conv_res = await self.db.execute(select(Conversation).where(Conversation.id == f.conversation_id))
+                conv = conv_res.scalar_one_or_none()
+                if conv and conv.persona:
+                    persona_name = conv.persona.name
+                    persona_emoji = conv.persona.emoji
+                    persona_id = str(conv.persona.id)
+
+                if f.description:
+                    message_excerpt = f.description
+                elif f.details_json:
+                    message_excerpt = f.details_json
+
+            risks.append({
+                "id": str(f.id),
+                "level": f.severity,
+                "type": f.finding_type,
+                "title": f.title,
+                "description": f.description or f.title,
+                "personaId": persona_id,
+                "personaName": persona_name,
+                "personaEmoji": persona_emoji,
+                "conversationId": str(f.conversation_id) if f.conversation_id else "",
+                "messageExcerpt": message_excerpt or "No excerpt available",
+                "recommendation": "Review agent logs and apply prompt guardrails for security and formatting.",
+                "count": 1,
+            })
+
+        total_convs = run.total_personas
+        flagged_convs = len(set(f.conversation_id for f in findings if f.conversation_id))
+
+        return {
+            "id": str(report.id),
+            "runId": str(run.id),
+            "agentId": agent_id,
+            "agentName": agent_name,
+            "status": "ready" if report.status == "completed" else "generating" if report.status == "generating" else "failed",
+            "scores": scores,
+            "risks": risks,
+            "riskSummary": risk_summary,
+            "totalConversations": total_convs,
+            "flaggedConversations": flagged_convs,
+            "generatedAt": report.created_at,
+            "createdAt": report.created_at,
+        }
+
     async def list_by_user(self, user_id: int, skip: int = 0, limit: int = 100) -> list[Report]:
         result = await self.db.execute(
             select(Report)

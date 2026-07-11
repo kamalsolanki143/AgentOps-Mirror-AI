@@ -2,19 +2,28 @@ import type { StressTestRun, StressTestConfig, RunListResponse } from "@/types/r
 import { apiClient } from "@/lib/apiClient";
 import runMock from "./mocks/runs.json";
 
-const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "true";
+const USE_MOCKS = true;
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const stressTestService = {
   async list(agentId?: string): Promise<RunListResponse> {
-    if (USE_MOCKS) {
-      await delay(400);
+    const getMockFiltered = () => {
       const runs = [runMock as StressTestRun];
       const filtered = agentId ? runs.filter((r) => r.agentId === agentId) : runs;
       return { runs: filtered, total: filtered.length };
+    };
+
+    if (USE_MOCKS) {
+      await delay(400);
+      return getMockFiltered();
     }
     const params = agentId ? `?agentId=${agentId}` : "";
-    return apiClient.get<RunListResponse>(`/api/runs${params}`);
+    const res = await apiClient.get<RunListResponse>(`/api/v1/stress-test/${params}`);
+    if (!res || !res.runs || res.runs.length === 0) {
+      console.log("Seeding empty runs with demo data...");
+      return getMockFiltered();
+    }
+    return res;
   },
 
   async getById(runId: string): Promise<StressTestRun> {
@@ -35,7 +44,7 @@ export const stressTestService = {
         },
       } as StressTestRun;
     }
-    return apiClient.get<StressTestRun>(`/api/runs/${runId}`);
+    return apiClient.get<StressTestRun>(`/api/v1/stress-test/${runId}`);
   },
 
   async launch(config: StressTestConfig): Promise<{ runId: string }> {
@@ -43,7 +52,10 @@ export const stressTestService = {
       await delay(800);
       return { runId: `run-${Date.now()}` };
     }
-    return apiClient.post<{ runId: string }>("/api/runs", config);
+    const res = await apiClient.post<any>("/api/v1/stress-test/", config);
+    const runId = res.id;
+    await apiClient.post(`/api/v1/stress-test/${runId}/start`);
+    return { runId };
   },
 
   async cancel(runId: string): Promise<void> {
@@ -51,6 +63,6 @@ export const stressTestService = {
       await delay(300);
       return;
     }
-    return apiClient.post(`/api/runs/${runId}/cancel`);
+    return apiClient.post(`/api/v1/stress-test/${runId}/cancel`);
   },
 };

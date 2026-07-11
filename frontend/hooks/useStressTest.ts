@@ -17,7 +17,7 @@ export function useStressTest(runId?: string) {
       const data = await stressTestService.getById(runId);
       setRun(data);
       // Stop polling when run is complete or failed
-      if (data.status === "complete" || data.status === "failed" || data.status === "cancelled") {
+      if (data.status === "completed" || data.status === "failed" || data.status === "cancelled") {
         if (pollingRef.current) {
           clearInterval(pollingRef.current);
           pollingRef.current = null;

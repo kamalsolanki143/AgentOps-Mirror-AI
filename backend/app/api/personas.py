@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
-from app.schemas.persona import PersonaCreate, PersonaUpdate, PersonaResponse
+from app.schemas.persona import PersonaCreate, PersonaUpdate, PersonaResponse, PersonaListResponse
 from app.services.persona_service import PersonaService
 from app.dependencies import get_current_user
 
@@ -19,7 +19,7 @@ async def create_persona(
     return await service.create(user_id, req)
 
 
-@router.get("/", response_model=list[PersonaResponse])
+@router.get("/", response_model=PersonaListResponse)
 async def list_personas(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
@@ -28,7 +28,10 @@ async def list_personas(
 ):
     user_id = int(user_data["sub"])
     service = PersonaService(db)
-    return await service.list_by_user(user_id, skip=skip, limit=limit)
+    personas = await service.list_by_user(user_id, skip=skip, limit=limit)
+    total = await service.count_by_user(user_id)
+    return {"personas": personas, "total": total}
+
 
 
 @router.get("/{persona_id}", response_model=PersonaResponse)

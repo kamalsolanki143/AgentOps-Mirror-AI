@@ -12,7 +12,7 @@ import { FileText, ArrowRight } from "lucide-react";
 import { scoreToRiskLevel } from "@/utils/riskLevel";
 
 export default function ReportsPage() {
-  const { reports, loading } = useReports();
+  const { reports, loading, error } = useReports();
 
   return (
     <div className="page-container">
@@ -24,6 +24,10 @@ export default function ReportsPage() {
             <div key={i} className="h-24 rounded-2xl bg-[#F3F4F6] animate-pulse" />
           ))}
         </div>
+      ) : error ? (
+        <Card className="p-8 border-red-200 bg-red-50/30 text-center max-w-xl mx-auto my-12">
+          <p className="text-sm text-ink-muted">Error loading reports: {error}</p>
+        </Card>
       ) : (
         <div className="space-y-4">
           {reports.map((report) => (
@@ -66,7 +70,7 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {!loading && reports.length === 0 && (
+      {!loading && !error && reports.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <FileText className="w-12 h-12 text-ink-muted mb-4" />
           <h3 className="text-base font-semibold font-display text-ink mb-1">No reports yet</h3>
